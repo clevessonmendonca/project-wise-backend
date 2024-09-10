@@ -3,100 +3,73 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Criação de Roles
-  const adminRole = await prisma.role.create({
-    data: {
-      name: 'Admin',
-      description: 'Administrator role with full permissions',
+  const permissions = [
+    { name: 'READ', description: 'Permission to read data' },
+    { name: 'WRITE', description: 'Permission to write data' },
+    { name: 'DELETE', description: 'Permission to delete data' },
+    {
+      name: 'admin',
+      description: 'Permission to assign roles to users',
     },
-  });
+  ];
 
-  const userRole = await prisma.role.create({
-    data: {
-      name: 'User',
-      description: 'Regular user role',
-    },
-  });
+  // Cria permissões se não existirem
+  for (const permission of permissions) {
+    const existingPermission = await prisma.permission.findUnique({
+      where: { name: permission.name },
+    });
 
-  // Criação de Permissions
-  const readPermission = await prisma.permission.create({
-    data: {
-      name: 'READ',
-      description: 'Read access',
-    },
-  });
+    if (!existingPermission) {
+      await prisma.permission.create({
+        data: permission,
+      });
+      console.log(`Permission '${permission.name}' created.`);
+    } else {
+      console.log(`Permission '${permission.name}' already exists.`);
+    }
+  }
 
-  const writePermission = await prisma.permission.create({
-    data: {
-      name: 'WRITE',
-      description: 'Write access',
-    },
-  });
+  // Define as roles
+  const roles = [
+    { name: 'user', description: 'Standard user role' },
+    { name: 'admin', description: 'Administrator role' },
+  ];
 
-  // Associações de Permissions a Roles
-  await prisma.rolePermission.create({
-    data: {
-      roleId: adminRole.id,
-      permissionId: readPermission.id,
-    },
-  });
+  // Cria roles se não existirem
+  for (const role of roles) {
+    const existingRole = await prisma.role.findUnique({
+      where: { name: role.name },
+    });
 
-  await prisma.rolePermission.create({
-    data: {
-      roleId: adminRole.id,
-      permissionId: writePermission.id,
-    },
-  });
+    if (!existingRole) {
+      const createdRole = await prisma.role.create({
+        data: role,
+      });
+      console.log(`Role '${role.name}' created.`);
 
-  await prisma.rolePermission.create({
-    data: {
-      roleId: userRole.id,
-      permissionId: readPermission.id,
-    },
-  });
-
-  // Criação de um User
-  const user = await prisma.user.create({
-    data: {
-      email: 'admin@example.com',
-      name: 'Admin User',
-      password: 'securepassword',
-      roles: {
-        connect: [{ id: adminRole.id }],
-      },
-    },
-  });
-
-  // Criação de um Project
-  const project = await prisma.project.create({
-    data: {
-      name: 'Project Alpha',
-      description: 'Description for Project Alpha',
-      users: {
-        connect: [{ id: user.id }],
-      },
-    },
-  });
-
-  // Criação de uma Task
-  const task = await prisma.task.create({
-    data: {
-      title: 'Sample Task',
-      description: 'Description of the sample task',
-      projectId: project.id,
-      assignees: {
-        connect: [{ id: user.id }],
-      },
-    },
-  });
-
-  console.log('Seed data created successfully');
+      // Atribuir todas as permissões ao papel 'admin'
+      if (role.name === 'admin') {
+        const allPermissions = await prisma.permission.findMany();
+        for (const permission of allPermissions) {
+          await prisma.rolePermission.create({
+            data: {
+              roleId: createdRole.id,
+              permissionId: permission.id,
+            },
+          });
+        }
+        console.log(`All permissions assigned to 'admin' role.`);
+      }
+    } else {
+      console.log(`Role '${role.name}' already exists.`);
+    }
+  }
 }
 
 main()
-  .catch(e => {
+  .catch((e) => {
     console.error(e);
-    throw e;
+    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
