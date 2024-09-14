@@ -2,6 +2,10 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '../services/authService';
 import { ProfileController } from './profileController';
 
+interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
 export class AuthController {
   private authService: AuthService;
   private profileController: ProfileController;
@@ -49,6 +53,18 @@ export class AuthController {
     } catch (err) {
       console.error('Error handling OAuth callback:', err);
       reply.status(500).send({ error: 'Failed to handle OAuth callback' });
+    }
+  }
+  public async refreshToken(
+    req: FastifyRequest<{ Body: RefreshTokenRequest }>, 
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const { refreshToken } = req.body;
+      const newTokens = await this.authService.refreshTokens(refreshToken);
+      reply.send(newTokens);
+    } catch (error) {
+      reply.status(401).send({ error: 'Token inválido ou expirado' });
     }
   }
 }

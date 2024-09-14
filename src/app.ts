@@ -10,8 +10,9 @@ import boardRoutes from './routes/boardRoutes';
 import workspaceRoutes from './routes/workspaceRoutes';
 import './config/index';
 import profileRoutes from './routes/profileRoutes';
+import { authHook } from './middleware/accessToken';
 
-const app = fastify();
+export const app = fastify();
 
 app.register(cors, {
   origin: '*',
@@ -32,6 +33,8 @@ app.register(FastifyOauth2, {
   callbackUri: 'http://localhost:5000/login/google/callback',
   scope: ['profile', 'email'],
 });
+
+// app.addHook('preHandler', authHook);
 
 app.register(authRoutes);
 app.register(profileRoutes, { prefix: '/profile' });

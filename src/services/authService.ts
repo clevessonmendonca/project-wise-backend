@@ -4,7 +4,8 @@ import prisma from '../models/prismaClient';
 import { ValidationError, ServerError } from '../validationErrors';
 import { UserService } from './userService';
 import { PasswordService } from '../utils/passwordService';
-import { generateToken } from '../utils/jwt';
+import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
+import { REFRESH_TOKEN_SECRET } from '../config';
 
 interface DecodedToken {
   email?: string;
@@ -20,38 +21,37 @@ export class AuthService {
     this.userService = new UserService();
   }
 
-  public async loginUser(email: string, password: string): Promise<string> {
+  public async loginUser(email: string, password: string): Promise<{ token: string, refreshToken: string }> {
     try {
       const user = await prisma.user.findUnique({
         where: { email },
       });
-
-      if (!user) {
+  
+      if (!user || !user.password) {
         throw new ValidationError('Usuário não encontrado');
       }
-
-      if (!user.password) {
-        throw new ValidationError(
-          'Senha não cadastrada. Entre em contato com o suporte.',
-        );
-      }
-
+  
       const isPasswordValid = await bcrypt.compare(password, user.password);
-
+  
       if (!isPasswordValid) {
         throw new ValidationError('Senha incorreta');
       }
-
-      const token = generateToken(user.id);
-      return token;
+  
+      const token = generateAccessToken(user.id);
+      const refreshToken = generateRefreshToken(user.id); 
+  
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { refreshToken },
+      });
+  
+      return { token, refreshToken };
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
       } else {
         console.error('Erro interno do servidor:', error);
-        throw new ServerError(
-          'Falha ao realizar login. Tente novamente mais tarde.',
-        );
+        throw new ServerError('Falha ao realizar login. Tente novamente mais tarde.');
       }
     }
   }
@@ -83,7 +83,7 @@ export class AuthService {
         user = newUser;
       }
 
-      const token = generateToken(user.id);
+      const token = generateAccessToken(user.id);
       return { token };
     } catch (err) {
       if (err instanceof ValidationError) {
@@ -91,6 +91,29 @@ export class AuthService {
       } else {
         throw new ServerError('Falha ao processar o callback do OAuth.');
       }
+    }
+  }
+
+  public async refreshTokens(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+    try {
+      const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as { sub: string };
+  
+      const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new ValidationError('Refresh token inválido');
+      }
+  
+      const newAccessToken = generateAccessToken(user.id);
+      const newRefreshToken = generateRefreshToken(user.id);
+  
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { refreshToken: newRefreshToken },
+      });
+  
+      return { token: newAccessToken, refreshToken: newRefreshToken };
+    } catch (error) {
+      throw new ValidationError('Refresh token inválido ou expirado');
     }
   }
 }

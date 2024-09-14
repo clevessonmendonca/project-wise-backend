@@ -8,7 +8,7 @@ export class BoardService {
   public async getBoardById(id: string) {
     return await prisma.board.findUnique({
       where: { id },
-      include: { tasks: true }, // Include tasks related to the board
+      include: { tasks: true }
     });
   }
 

@@ -33,7 +33,7 @@ export class BoardController {
 
   public async createBoard(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const boardData = req.body; // Validate body as needed
+      const boardData = req.body; 
       const board = await this.boardService.createBoard(boardData);
       reply.status(201).send(board);
     } catch (error) {
