@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { BoardService } from '../services/boardService';
+import { Board } from '@prisma/client';
 
 export class BoardController {
   private boardService: BoardService;
@@ -8,85 +9,110 @@ export class BoardController {
     this.boardService = new BoardService();
   }
 
-  public async getAllBoards(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async getAllBoards(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
       const boards = await this.boardService.getAllBoards();
       reply.send(boards);
     } catch (error) {
-      this.handleError(reply, error, 'Failed to fetch boards');
+      this.handleError(reply, error, 'Falha ao buscar boards');
     }
   }
 
-  public async getBoardById(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async getBoardById(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
       const board = await this.boardService.getBoardById(id);
       if (board) {
         reply.send(board);
       } else {
-        reply.status(404).send({ error: 'Board not found' });
+        reply.status(404).send({ error: 'Board não encontrado' });
       }
     } catch (error) {
-      this.handleError(reply, error, 'Failed to fetch board');
+      this.handleError(reply, error, 'Falha ao buscar o board');
     }
   }
 
-  public async createBoard(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async createBoard(
+    req: FastifyRequest<{ Body: Board }>,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
-      const boardData = req.body; 
+      const boardData = req.body;
+
+      if (!boardData.projectId) {
+        return reply.status(400).send({ error: 'projectId é obrigatório' });
+      }
+
       const board = await this.boardService.createBoard(boardData);
       reply.status(201).send(board);
     } catch (error) {
-      this.handleError(reply, error, 'Failed to create board');
+      this.handleError(reply, error, 'Falha ao criar o board');
     }
   }
 
-  public async updateBoard(req: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const { id } = req.params as { id: string };
+  public async updateBoard(
+    req: FastifyRequest<{ Params: { id: string }; Body: Board }>,
+    reply: FastifyReply,
+  ): Promise<void> {
+    const { id } = req.params;
     try {
-      const boardData = req.body; // Validate body as needed
+      const boardData = req.body;
       const updatedBoard = await this.boardService.updateBoard(id, boardData);
       if (updatedBoard) {
         reply.send(updatedBoard);
       } else {
-        reply.status(404).send({ error: 'Board not found' });
+        reply.status(404).send({ error: 'Board não encontrado' });
       }
     } catch (error) {
-      this.handleError(reply, error, 'Failed to update board');
+      this.handleError(reply, error, 'Falha ao atualizar o board');
     }
   }
 
-  public async deleteBoard(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async deleteBoard(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
       const deletedBoard = await this.boardService.deleteBoard(id);
       if (deletedBoard) {
         reply.status(204).send();
       } else {
-        reply.status(404).send({ error: 'Board not found' });
+        reply.status(404).send({ error: 'Board não encontrado' });
       }
     } catch (error) {
-      this.handleError(reply, error, 'Failed to delete board');
+      this.handleError(reply, error, 'Falha ao deletar o board');
     }
   }
 
-  public async getBoardTasks(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async getBoardTasks(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
       const tasks = await this.boardService.getBoardTasks(id);
       reply.send(tasks);
     } catch (error) {
-      this.handleError(reply, error, 'Failed to fetch tasks');
+      this.handleError(reply, error, 'Falha ao buscar tarefas do board');
     }
   }
 
   private handleError(reply: FastifyReply, error: unknown, message: string) {
     if (error instanceof Error) {
-      console.error(message, error.message); // Log the error message
+      console.error(message, error.message);
       reply.status(500).send({ error: message, details: error.message });
     } else {
-      console.error(message, error); // Log the error details if it's not an instance of Error
-      reply.status(500).send({ error: message, details: 'An unknown error occurred' });
+      console.error(message, error);
+      reply
+        .status(500)
+        .send({ error: message, details: 'Ocorreu um erro desconhecido' });
     }
   }
 }

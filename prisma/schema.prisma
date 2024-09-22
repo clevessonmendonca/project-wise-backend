@@ -8,23 +8,23 @@ generator client {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  email     String      @unique
-  name      String?
-  password  String?
-  googleId  String?
-  picture   String?
+  id           String      @id @default(uuid())
+  email        String      @unique
+  name         String?
+  password     String?
+  googleId     String?
+  picture      String?
   refreshToken String?
-  roles     Role[]      @relation("UserRoles")
-  projects  Project[]   @relation("ProjectUsers")
-  tasks     Task[]      @relation("TaskAssignees")
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  UserRole  UserRole[]
-  Comment   Comment[]
-  ChangeLog ChangeLog[]
-  Team      Team[]      @relation("TeamMembers")
-  Feedback  Feedback[]
+  roles        Role[]      @relation("UserRoles")
+  projects     Project[]   @relation("ProjectUsers")
+  tasks        Task[]      @relation("TaskAssignees")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  UserRole     UserRole[]
+  Comment      Comment[]
+  ChangeLog    ChangeLog[]
+  Team         Team[]      @relation("TeamMembers")
+  Feedback     Feedback[]
 }
 
 model Role {
@@ -33,6 +33,7 @@ model Role {
   description    String?
   users          User[]           @relation("UserRoles")
   permissions    Permission[]     @relation("RolePermissions")
+  createdAt      DateTime         @default(now())
   UserRole       UserRole[]
   RolePermission RolePermission[]
 }
@@ -51,6 +52,7 @@ model Permission {
   name           String           @unique
   description    String?
   roles          Role[]           @relation("RolePermissions")
+  createdAt      DateTime         @default(now())
   RolePermission RolePermission[]
 }
 
@@ -64,9 +66,12 @@ model RolePermission {
 }
 
 model Workspace {
-  id       String    @id @default(uuid())
-  name     String
-  projects Project[]
+  id        String    @id @default(uuid())
+  name      String
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?  @updatedAt
+  iconUrl   String    @default("HomeIcon")
 }
 
 model Project {
@@ -85,6 +90,8 @@ model Project {
   resources    ResourceAllocation[]
   teams        Team[]
   changeLogs   ChangeLog[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
   functionalRequirements    String[]
   nonFunctionalRequirements String[]
@@ -96,8 +103,7 @@ model Project {
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   Comment Comment[]
-
-  Board Board[]
+  Board   Board[]
 }
 
 model Board {
@@ -109,9 +115,9 @@ model Board {
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id])
   tasks       Task[]   @relation("BoardTasks")
+  createdAt   DateTime @default(now())
 
-  Task Task[]
-
+  Task    Task[]
   Project Project[] @relation("ProjectBoards")
 }
 
@@ -126,6 +132,7 @@ model Task {
   boardId     String
   board       Board    @relation(fields: [boardId], references: [id])
   assignees   User[]   @relation("TaskAssignees")
+  createdAt   DateTime @default(now())
 
   Board Board[] @relation("BoardTasks")
 }
@@ -157,16 +164,18 @@ model ResourceAllocation {
   resourceType String
   quantity     Int
   allocatedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
   projectId    String
   project      Project  @relation(fields: [projectId], references: [id])
 }
 
 model Team {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  members   User[]  @relation("TeamMembers")
+  members   User[]   @relation("TeamMembers")
+  createdAt DateTime @default(now())
   projectId String
-  project   Project @relation(fields: [projectId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id])
 }
 
 model Comment {
@@ -175,14 +184,16 @@ model Comment {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
   project   Project? @relation(fields: [projectId], references: [id])
+  createdAt DateTime @default(now())
   projectId String?
 }
 
 model ChangeLog {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   change    String
-  user      User    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
   userId    String
-  project   Project @relation(fields: [projectId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id])
   projectId String
 }
