@@ -14,6 +14,7 @@ const envSchema = z.object({
   BASE_URL: z.string().url('BASE_URL must be a valid URL'),
   GOOGLE_CALLBACK_URL: z.string().url('GOOGLE_CALLBACK_URL must be a valid URL'),
   OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
+  OPENAI_MODEL: z.string().min(1, 'OPENAI_MODEL is required'),
   NODE_ENV: z.enum(['development', 'production', 'test'], {
     errorMap: () => ({ message: 'NODE_ENV must be one of development, production, or test' }),
   }),
@@ -37,5 +38,6 @@ export const {
   BASE_URL,
   GOOGLE_CALLBACK_URL,
   OPENAI_API_KEY,
+  OPENAI_MODEL,
   NODE_ENV,
 } = env.data;
