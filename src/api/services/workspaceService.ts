@@ -1,9 +1,9 @@
 import prisma from '../../models/prismaClient';
-import { ServerError, ValidationError } from '../../validationErrors';
+import { ServerError, ValidationError } from '../../errors/validationErrors';
 import {
   CreateWorkspaceBody,
   UpdateWorkspaceBody,
-} from '../../validationSchemas';
+} from '../../errors/validationSchemas';
 import { Workspace } from '@prisma/client';
 
 export class WorkspaceService {

@@ -5,9 +5,9 @@ import {
   updateRoleSchema,
   CreateRoleBody,
   UpdateRoleBody,
-} from '../../validationSchemas';
+} from '../../errors/validationSchemas';
 import { ZodError } from 'zod';
-import { ValidationError } from '../../validationErrors';
+import { ValidationError } from '../../errors/validationErrors';
 
 export class RoleController {
   private roleService: RoleService;

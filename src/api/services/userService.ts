@@ -1,7 +1,7 @@
 import prisma from '../../models/prismaClient';
 import { PasswordService } from '../../utils/passwordService';
-import { ServerError, ValidationError } from '../../validationErrors';
-import { CreateUserBody, UpdateUserBody } from '../../validationSchemas';
+import { ServerError, ValidationError } from '../../errors/validationErrors';
+import { CreateUserBody, UpdateUserBody } from '../../errors/validationSchemas';
 import { User } from '@prisma/client';
 
 export class UserService {

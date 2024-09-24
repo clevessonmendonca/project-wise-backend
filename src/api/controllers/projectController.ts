@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { ProjectService } from '../services/projectService';
 import { ZodError } from 'zod';
 import { Project } from '@prisma/client';
-import { NotFoundError, ValidationError } from '../../validationErrors';
+import { NotFoundError, ValidationError } from '../../errors/validationErrors';
 
 export class ProjectController {
   private projectService: ProjectService;

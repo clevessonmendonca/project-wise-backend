@@ -3,7 +3,7 @@ import { WorkspaceService } from '../services/workspaceService';
 import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
-} from '../../validationSchemas';
+} from '../../errors/validationSchemas';
 import { ZodError } from 'zod';
 
 export class WorkspaceController {
@@ -59,12 +59,10 @@ export class WorkspaceController {
           .send({ error: 'Validation failed', details: error.errors });
       } else if (error instanceof Error) {
         console.error('Error creating workspace:', error.message);
-        reply
-          .status(500)
-          .send({
-            error: 'Failed to create workspace',
-            details: error.message,
-          });
+        reply.status(500).send({
+          error: 'Failed to create workspace',
+          details: error.message,
+        });
       } else {
         console.error('Unexpected error:', error);
         reply.status(500).send({ error: 'Unexpected error occurred' });

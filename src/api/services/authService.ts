@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../../models/prismaClient';
-import { ValidationError, ServerError } from '../../validationErrors';
+import { ValidationError, ServerError } from '../../errors/validationErrors';
 import { UserService } from './userService';
 import { PasswordService } from '../../utils/passwordService';
 import { generateAccessToken, generateRefreshToken } from '../../utils/jwt';

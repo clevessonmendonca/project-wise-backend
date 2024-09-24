@@ -1,6 +1,6 @@
 import prisma from '../../models/prismaClient';
-import { ServerError, ValidationError } from '../../validationErrors';
-import { CreateRoleBody, UpdateRoleBody } from '../../validationSchemas';
+import { ServerError, ValidationError } from '../../errors/validationErrors';
+import { CreateRoleBody, UpdateRoleBody } from '../../errors/validationSchemas';
 
 export class RoleService {
   public async createRole(data: CreateRoleBody) {

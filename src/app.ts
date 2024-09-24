@@ -9,7 +9,7 @@ import roleRoutes from './api/routes/roleRoutes';
 import taskRoutes from './api/routes/taskRoutes';
 import userRoutes from './api/routes/userRoutes';
 import workspaceRoutes from './api/routes/workspaceRoutes';
-import openaiRoutes from './IA/openAI/routes/openaiRoutes';
+import { setupWebSocket } from './websockets/ws';
 
 export const app = fastify();
 
@@ -19,7 +19,6 @@ app.register(cors, {
   allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
-// Configuração do OAuth2 do Google
 app.register(FastifyOauth2, {
   name: 'googleOAuth2',
   credentials: {
@@ -43,7 +42,7 @@ app.register(boardRoutes, { prefix: '/boards' });
 app.register(taskRoutes, { prefix: '/tasks' });
 app.register(workspaceRoutes, { prefix: '/workspace' });
 
-app.register(openaiRoutes, { prefix: '/ia/openai' }); 
+setupWebSocket(app);
 
 async function start() {
   try {
