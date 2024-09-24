@@ -1,8 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { ProjectController } from '../controllers/projectController';
+import { authenticate } from '../../middlewares/authenticate';
 
 export default async function projectRoutes(fastify: FastifyInstance) {
   const projectController = new ProjectController();
+
+  fastify.addHook('preHandler', authenticate);
 
   fastify.get('', projectController.getAllProjects.bind(projectController));
   fastify.get('/:id', projectController.getProjectById.bind(projectController));

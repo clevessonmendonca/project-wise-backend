@@ -2,12 +2,28 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { ProjectService } from '../services/projectService';
 import { ZodError } from 'zod';
 import { Project } from '@prisma/client';
+import { NotFoundError, ValidationError } from '../../validationErrors';
 
 export class ProjectController {
   private projectService: ProjectService;
 
   constructor() {
     this.projectService = new ProjectService();
+  }
+
+  private handleError(reply: FastifyReply, error: unknown): void {
+    if (error instanceof ValidationError) {
+      reply.status(error.statusCode).send({ error: error.message });
+    } else if (error instanceof NotFoundError) {
+      reply.status(error.statusCode).send({ error: error.message });
+    } else if (error instanceof ZodError) {
+      reply
+        .status(400)
+        .send({ error: 'Invalid project data', details: error.errors });
+    } else {
+      console.error('Error:', error);
+      reply.status(500).send({ error: 'Internal Server Error' });
+    }
   }
 
   public async getAllProjects(
@@ -19,8 +35,7 @@ export class ProjectController {
       const projects = await this.projectService.getAllProjects(workspaceId);
       reply.send(projects);
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      reply.status(500).send({ error: 'Failed to fetch projects' });
+      this.handleError(reply, error);
     }
   }
 
@@ -28,17 +43,16 @@ export class ProjectController {
     req: FastifyRequest,
     reply: FastifyReply,
   ): Promise<void> {
-    const { id } = req.params as { id: string };
+    const { projectId } = req.params as { projectId: string };
     try {
-      const project = await this.projectService.getProjectById(id);
+      const project = await this.projectService.getProjectById(projectId);
       if (project) {
         reply.send(project);
       } else {
         reply.status(404).send({ error: 'Project not found' });
       }
     } catch (error) {
-      console.error('Error fetching project:', error);
-      reply.status(500).send({ error: 'Failed to fetch project' });
+      this.handleError(reply, error);
     }
   }
 
@@ -51,14 +65,7 @@ export class ProjectController {
       const project = await this.projectService.createProject(data);
       reply.status(201).send(project);
     } catch (error) {
-      if (error instanceof ZodError) {
-        reply
-          .status(400)
-          .send({ error: 'Invalid project data', details: error.errors });
-      } else {
-        console.error('Error creating project:', error);
-        reply.status(500).send({ error: 'Failed to create project' });
-      }
+      this.handleError(reply, error);
     }
   }
 
@@ -66,24 +73,20 @@ export class ProjectController {
     req: FastifyRequest,
     reply: FastifyReply,
   ): Promise<void> {
-    const { id } = req.params as { id: string };
+    const { projectId } = req.params as { projectId: string };
     try {
       const data = req.body as Project;
-      const updatedProject = await this.projectService.updateProject(id, data);
+      const updatedProject = await this.projectService.updateProject(
+        projectId,
+        data,
+      );
       if (updatedProject) {
         reply.send(updatedProject);
       } else {
         reply.status(404).send({ error: 'Project not found' });
       }
     } catch (error) {
-      if (error instanceof ZodError) {
-        reply
-          .status(400)
-          .send({ error: 'Invalid project data', details: error.errors });
-      } else {
-        console.error('Error updating project:', error);
-        reply.status(500).send({ error: 'Failed to update project' });
-      }
+      this.handleError(reply, error);
     }
   }
 
@@ -91,17 +94,16 @@ export class ProjectController {
     req: FastifyRequest,
     reply: FastifyReply,
   ): Promise<void> {
-    const { id } = req.params as { id: string };
+    const { projectId } = req.params as { projectId: string };
     try {
-      const deletedProject = await this.projectService.deleteProject(id);
+      const deletedProject = await this.projectService.deleteProject(projectId);
       if (deletedProject) {
         reply.status(204).send();
       } else {
         reply.status(404).send({ error: 'Project not found' });
       }
     } catch (error) {
-      console.error('Error deleting project:', error);
-      reply.status(500).send({ error: 'Failed to delete project' });
+      this.handleError(reply, error);
     }
   }
 
@@ -114,8 +116,7 @@ export class ProjectController {
       const boards = await this.projectService.getProjectBoards(projectId);
       reply.send(boards);
     } catch (error) {
-      console.error('Error fetching project boards:', error);
-      reply.status(500).send({ error: 'Failed to fetch project boards' });
+      this.handleError(reply, error);
     }
   }
 
@@ -128,8 +129,7 @@ export class ProjectController {
       const tasks = await this.projectService.getProjectTasks(projectId);
       reply.send(tasks);
     } catch (error) {
-      console.error('Error fetching project tasks:', error);
-      reply.status(500).send({ error: 'Failed to fetch project tasks' });
+      this.handleError(reply, error);
     }
   }
 
@@ -142,8 +142,7 @@ export class ProjectController {
       const feedback = await this.projectService.getProjectFeedback(projectId);
       reply.send(feedback);
     } catch (error) {
-      console.error('Error fetching project feedback:', error);
-      reply.status(500).send({ error: 'Failed to fetch project feedback' });
+      this.handleError(reply, error);
     }
   }
 
@@ -156,8 +155,7 @@ export class ProjectController {
       const risks = await this.projectService.getProjectRisks(projectId);
       reply.send(risks);
     } catch (error) {
-      console.error('Error fetching project risks:', error);
-      reply.status(500).send({ error: 'Failed to fetch project risks' });
+      this.handleError(reply, error);
     }
   }
 
@@ -167,11 +165,11 @@ export class ProjectController {
   ): Promise<void> {
     const { projectId } = req.params as { projectId: string };
     try {
-      const resourceAllocations = await this.projectService.getProjectResourceAllocations(projectId);
+      const resourceAllocations =
+        await this.projectService.getProjectResourceAllocations(projectId);
       reply.send(resourceAllocations);
     } catch (error) {
-      console.error('Error fetching project resource allocations:', error);
-      reply.status(500).send({ error: 'Failed to fetch project resource allocations' });
+      this.handleError(reply, error);
     }
   }
 
@@ -184,8 +182,7 @@ export class ProjectController {
       const teams = await this.projectService.getProjectTeams(projectId);
       reply.send(teams);
     } catch (error) {
-      console.error('Error fetching project teams:', error);
-      reply.status(500).send({ error: 'Failed to fetch project teams' });
+      this.handleError(reply, error);
     }
   }
 
@@ -198,8 +195,7 @@ export class ProjectController {
       const comments = await this.projectService.getProjectComments(projectId);
       reply.send(comments);
     } catch (error) {
-      console.error('Error fetching project comments:', error);
-      reply.status(500).send({ error: 'Failed to fetch project comments' });
+      this.handleError(reply, error);
     }
   }
 
@@ -209,11 +205,11 @@ export class ProjectController {
   ): Promise<void> {
     const { projectId } = req.params as { projectId: string };
     try {
-      const changeLogs = await this.projectService.getProjectChangeLogs(projectId);
+      const changeLogs =
+        await this.projectService.getProjectChangeLogs(projectId);
       reply.send(changeLogs);
     } catch (error) {
-      console.error('Error fetching project change logs:', error);
-      reply.status(500).send({ error: 'Failed to fetch project change logs' });
+      this.handleError(reply, error);
     }
   }
 }
