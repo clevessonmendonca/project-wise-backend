@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { SECRET_KEY } from '../config';
+import { JWT_SECRET_KEY } from '../config';
 import prisma from '../models/prismaClient';
 
 export function checkPermissions(requiredPermissions: string[]) {
@@ -18,7 +18,7 @@ export function checkPermissions(requiredPermissions: string[]) {
         return;
       }
 
-      const decoded: any = jwt.verify(token, SECRET_KEY);
+      const decoded: any = jwt.verify(token, JWT_SECRET_KEY);
       const userId = decoded.id;
 
       const user = await prisma.user.findUnique({

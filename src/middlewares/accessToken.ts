@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { SECRET_KEY } from '../config';
+import { JWT_SECRET_KEY, } from '../config';
 import { FastifyRequest, FastifyReply } from 'fastify';
 
 export const authHook = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -12,7 +12,7 @@ export const authHook = async (request: FastifyRequest, reply: FastifyReply) => 
     }
   
     try {
-      const decoded = jwt.verify(token, SECRET_KEY) as { sub: string };
+      const decoded = jwt.verify(token, JWT_SECRET_KEY) as { sub: string };
       // @ts-ignore
       request.user = decoded.sub;
     } catch (error) {
