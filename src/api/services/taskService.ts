@@ -1,4 +1,5 @@
-import prisma from '../models/prismaClient';
+import { Task } from '@prisma/client';
+import prisma from '../../models/prismaClient';
 
 export class TaskService {
   public async getAllTasks() {
@@ -11,13 +12,13 @@ export class TaskService {
     });
   }
 
-  public async createTask(data: any) {
+  public async createTask(data: Task) {
     return await prisma.task.create({
       data,
     });
   }
 
-  public async updateTask(id: string, data: any) {
+  public async updateTask(id: string, data: Task) {
     return await prisma.task.update({
       where: { id },
       data,

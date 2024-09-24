@@ -1,8 +1,13 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { RoleService } from '../services/roleService';
-import { createRoleSchema, updateRoleSchema, CreateRoleBody, UpdateRoleBody } from '../validationSchemas';
+import {
+  createRoleSchema,
+  updateRoleSchema,
+  CreateRoleBody,
+  UpdateRoleBody,
+} from '../../validationSchemas';
 import { ZodError } from 'zod';
-import { ValidationError } from '../validationErrors';
+import { ValidationError } from '../../validationErrors';
 
 export class RoleController {
   private roleService: RoleService;
@@ -21,7 +26,9 @@ export class RoleController {
       reply.status(201).send(role);
     } catch (error) {
       if (error instanceof ZodError) {
-        reply.status(400).send({ error: 'Validation failed', details: error.errors });
+        reply
+          .status(400)
+          .send({ error: 'Validation failed', details: error.errors });
       } else {
         console.error('Error creating role:', error);
         reply.status(500).send({ error: 'Failed to create role' });
@@ -57,7 +64,9 @@ export class RoleController {
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        reply.status(400).send({ error: 'Validation failed', details: error.errors });
+        reply
+          .status(400)
+          .send({ error: 'Validation failed', details: error.errors });
       } else {
         console.error('Error updating role:', error);
         reply.status(500).send({ error: 'Failed to update role' });
@@ -88,7 +97,10 @@ export class RoleController {
     reply: FastifyReply,
   ): Promise<void> {
     try {
-      const { userId, roleId } = request.body as { userId: string, roleId: string };
+      const { userId, roleId } = request.body as {
+        userId: string;
+        roleId: string;
+      };
 
       await this.roleService.assignRole(userId, roleId);
 

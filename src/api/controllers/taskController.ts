@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { TaskService } from '../services/taskService';
+import { Task } from '@prisma/client';
 
 export class TaskController {
   private taskService: TaskService;
@@ -8,7 +9,10 @@ export class TaskController {
     this.taskService = new TaskService();
   }
 
-  public async getAllTasks(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async getAllTasks(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
       const tasks = await this.taskService.getAllTasks();
       reply.send(tasks);
@@ -17,7 +21,10 @@ export class TaskController {
     }
   }
 
-  public async getTaskById(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async getTaskById(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
       const task = await this.taskService.getTaskById(id);
@@ -31,9 +38,12 @@ export class TaskController {
     }
   }
 
-  public async createTask(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async createTask(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
-      const taskData = req.body;
+      const taskData = req.body as Task;
       const task = await this.taskService.createTask(taskData);
       reply.status(201).send(task);
     } catch (error) {
@@ -41,10 +51,13 @@ export class TaskController {
     }
   }
 
-  public async updateTask(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async updateTask(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
-      const taskData = req.body;
+      const taskData = req.body as Task;
       const updatedTask = await this.taskService.updateTask(id, taskData);
       if (updatedTask) {
         reply.send(updatedTask);
@@ -56,7 +69,10 @@ export class TaskController {
     }
   }
 
-  public async deleteTask(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  public async deleteTask(
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     const { id } = req.params as { id: string };
     try {
       const deletedTask = await this.taskService.deleteTask(id);
@@ -72,11 +88,13 @@ export class TaskController {
 
   private handleError(reply: FastifyReply, error: unknown, message: string) {
     if (error instanceof Error) {
-      console.error(message, error.message); 
+      console.error(message, error.message);
       reply.status(500).send({ error: message, details: error.message });
     } else {
-      console.error(message, error); 
-      reply.status(500).send({ error: message, details: 'An unknown error occurred' });
+      console.error(message, error);
+      reply
+        .status(500)
+        .send({ error: message, details: 'An unknown error occurred' });
     }
   }
 }

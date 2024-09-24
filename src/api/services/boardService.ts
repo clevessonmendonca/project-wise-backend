@@ -1,4 +1,4 @@
-import prisma from '../models/prismaClient';
+import prisma from '../../models/prismaClient';
 
 export class BoardService {
   public async getAllBoards() {

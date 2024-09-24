@@ -1,6 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { WorkspaceService } from '../services/workspaceService';
-import { createWorkspaceSchema, updateWorkspaceSchema } from '../validationSchemas';
+import {
+  createWorkspaceSchema,
+  updateWorkspaceSchema,
+} from '../../validationSchemas';
 import { ZodError } from 'zod';
 
 export class WorkspaceController {
@@ -58,7 +61,10 @@ export class WorkspaceController {
         console.error('Error creating workspace:', error.message);
         reply
           .status(500)
-          .send({ error: 'Failed to create workspace', details: error.message });
+          .send({
+            error: 'Failed to create workspace',
+            details: error.message,
+          });
       } else {
         console.error('Unexpected error:', error);
         reply.status(500).send({ error: 'Unexpected error occurred' });
@@ -73,7 +79,10 @@ export class WorkspaceController {
     const { id } = req.params as { id: string };
     try {
       const body = updateWorkspaceSchema.parse(req.body);
-      const updatedWorkspace = await this.workspaceService.updateWorkspace(id, body);
+      const updatedWorkspace = await this.workspaceService.updateWorkspace(
+        id,
+        body,
+      );
       if (updatedWorkspace) {
         reply.send(updatedWorkspace);
       } else {

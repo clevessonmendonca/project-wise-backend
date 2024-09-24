@@ -6,7 +6,7 @@ export default async function taskRoutes(fastify: FastifyInstance) {
 
   fastify.get('/', taskController.getAllTasks.bind(taskController));
   fastify.get('/:id', taskController.getTaskById.bind(taskController));
-  fastify.post('', taskController.createTask.bind(taskController));
+  fastify.post('/', taskController.createTask.bind(taskController));
   fastify.put('/:id', taskController.updateTask.bind(taskController));
   fastify.delete('/:id', taskController.deleteTask.bind(taskController));
 }

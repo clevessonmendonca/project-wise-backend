@@ -1,5 +1,5 @@
 import { Project } from '@prisma/client';
-import prisma from '../models/prismaClient';
+import prisma from '../../models/prismaClient';
 
 export class ProjectService {
   public async getAllProjects(workspaceId: string) {

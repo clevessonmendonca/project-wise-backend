@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/userService';
 import jwt from 'jsonwebtoken';
-import { SECRET_KEY } from '../config';
+import { SECRET_KEY } from '../../config';
 
 export class ProfileController {
   private userService: UserService;

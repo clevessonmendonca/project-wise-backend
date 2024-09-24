@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/userService';
-import { createUserSchema, updateUserSchema } from '../validationSchemas';
+import { createUserSchema, updateUserSchema } from '../../validationSchemas';
 import { ZodError } from 'zod';
 
 export class UserController {

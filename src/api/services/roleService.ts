@@ -1,6 +1,6 @@
-import prisma from '../models/prismaClient';
-import { ServerError, ValidationError } from '../validationErrors';
-import { CreateRoleBody, UpdateRoleBody } from '../validationSchemas';
+import prisma from '../../models/prismaClient';
+import { ServerError, ValidationError } from '../../validationErrors';
+import { CreateRoleBody, UpdateRoleBody } from '../../validationSchemas';
 
 export class RoleService {
   public async createRole(data: CreateRoleBody) {
@@ -61,7 +61,9 @@ export class RoleService {
         throw new ValidationError('User not found');
       }
 
-      const permissions = user.roles.flatMap(role => role.permissions.map(permission => permission.name));
+      const permissions = user.roles.flatMap((role) =>
+        role.permissions.map((permission) => permission.name),
+      );
 
       if (!permissions.includes('admin:assign_roles')) {
         throw new ValidationError('Forbidden');

@@ -1,16 +1,15 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import FastifyOauth2 from '@fastify/oauth2';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
-import roleRoutes from './routes/roleRoutes';
-import projectRoutes from './routes/projectRoutes';
-import taskRoutes from './routes/taskRoutes';
-import boardRoutes from './routes/boardRoutes';
-import workspaceRoutes from './routes/workspaceRoutes';
+import authRoutes from './api/routes/authRoutes';
+import userRoutes from './api/routes/userRoutes';
+import roleRoutes from './api/routes/roleRoutes';
+import projectRoutes from './api/routes/projectRoutes';
+import taskRoutes from './api/routes/taskRoutes';
+import boardRoutes from './api/routes/boardRoutes';
+import workspaceRoutes from './api/routes/workspaceRoutes';
 import './config/index';
-import profileRoutes from './routes/profileRoutes';
-import { authHook } from './middleware/accessToken';
+import profileRoutes from './api/routes/profileRoutes';
 
 export const app = fastify();
 
@@ -33,8 +32,6 @@ app.register(FastifyOauth2, {
   callbackUri: 'http://localhost:5000/login/google/callback',
   scope: ['profile', 'email'],
 });
-
-// app.addHook('preHandler', authHook);
 
 app.register(authRoutes);
 app.register(profileRoutes, { prefix: '/profile' });
