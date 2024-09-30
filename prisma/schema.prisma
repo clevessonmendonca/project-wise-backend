@@ -25,6 +25,8 @@ model User {
   ChangeLog    ChangeLog[]
   Team         Team[]      @relation("TeamMembers")
   Feedback     Feedback[]
+
+  FavoriteBoard FavoriteBoard[]
 }
 
 model Role {
@@ -119,7 +121,22 @@ model Board {
 
   Task    Task[]
   Project Project[] @relation("ProjectBoards")
+
+  FavoriteBoard FavoriteBoard[]
 }
+
+model FavoriteBoard {
+  id        String   @id @default(uuid())
+  userId    String
+  boardId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  board     Board    @relation(fields: [boardId], references: [id])
+
+  @@unique([userId, boardId])
+}
+
 
 model Task {
   id          String   @id @default(uuid())

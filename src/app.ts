@@ -9,7 +9,7 @@ import roleRoutes from './api/routes/roleRoutes';
 import taskRoutes from './api/routes/taskRoutes';
 import userRoutes from './api/routes/userRoutes';
 import workspaceRoutes from './api/routes/workspaceRoutes';
-import { setupWebSocket } from './websockets/ws';
+import { setupWebSocket } from './websocket/ws';
 
 export const app = fastify();
 

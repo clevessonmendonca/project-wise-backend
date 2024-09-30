@@ -104,6 +104,40 @@ export class BoardController {
     }
   }
 
+  public async toggleFavoriteBoard(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ): Promise<void> {
+    const { id } = req.params as { id: string };
+    // @ts-ignore
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return reply.status(401).send({ error: 'Usuário não autenticado' });
+    }
+
+    try {
+      const favoritesCount = await this.boardService.countUserFavorites(userId);
+      const isFavorited = await this.boardService.isBoardFavorited(userId, id);
+
+      if (!isFavorited && favoritesCount >= 3) {
+        return reply
+          .status(400)
+          .send({ error: 'Você pode favoritar no máximo 3 boards' });
+      }
+
+      if (isFavorited) {
+        await this.boardService.removeFavorite(userId, id);
+        reply.send({ message: 'Board desfavoritado com sucesso' });
+      } else {
+        await this.boardService.addFavorite(userId, id);
+        reply.send({ message: 'Board favoritado com sucesso' });
+      }
+    } catch (error) {
+      this.handleError(reply, error, 'Falha ao favoritar/desfavoritar o board');
+    }
+  }
+
   private handleError(reply: FastifyReply, error: unknown, message: string) {
     if (error instanceof Error) {
       console.error(message, error.message);

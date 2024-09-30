@@ -51,4 +51,38 @@ export class BoardService {
       where: { boardId },
     });
   }
+
+  public async countUserFavorites(userId: string) {
+    return await prisma.favoriteBoard.count({
+      where: { userId },
+    });
+  }
+
+  public async isBoardFavorited(userId: string, boardId: string) {
+    return await prisma.favoriteBoard.findUnique({
+      where: {
+        userId_boardId: {
+          userId,
+          boardId,
+        },
+      },
+    });
+  }
+
+  public async addFavorite(userId: string, boardId: string) {
+    return await prisma.favoriteBoard.create({
+      data: { userId, boardId },
+    });
+  }
+
+  public async removeFavorite(userId: string, boardId: string) {
+    return await prisma.favoriteBoard.delete({
+      where: {
+        userId_boardId: {
+          userId,
+          boardId,
+        },
+      },
+    });
+  }
 }
