@@ -36,17 +36,20 @@ model Role {
   users          User[]           @relation("UserRoles")
   permissions    Permission[]     @relation("RolePermissions")
   createdAt      DateTime         @default(now())
-  UserRole       UserRole[]
+  userRoles      UserRole[]       @relation("RoleUserRoles")
+  UserRole       UserRole[]       @relation("RoleNameUserRoles")
   RolePermission RolePermission[]
 }
 
 model UserRole {
-  id        String   @id @default(uuid())
-  userId    String
-  roleId    String
-  user      User     @relation(fields: [userId], references: [id])
-  role      Role     @relation(fields: [roleId], references: [id])
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String
+  roleId     String
+  roleName   String
+  user       User     @relation(fields: [userId], references: [id])
+  roleById   Role     @relation("RoleUserRoles", fields: [roleId], references: [id])
+  roleByName Role     @relation("RoleNameUserRoles", fields: [roleName], references: [name])
+  createdAt  DateTime @default(now())
 }
 
 model Permission {
@@ -72,7 +75,7 @@ model Workspace {
   name      String
   projects  Project[]
   createdAt DateTime  @default(now())
-  updatedAt DateTime?  @updatedAt
+  updatedAt DateTime? @updatedAt
   iconUrl   String    @default("HomeIcon")
 }
 
@@ -131,12 +134,11 @@ model FavoriteBoard {
   boardId   String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  board     Board    @relation(fields: [boardId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  board Board @relation(fields: [boardId], references: [id])
 
   @@unique([userId, boardId])
 }
-
 
 model Task {
   id          String   @id @default(uuid())

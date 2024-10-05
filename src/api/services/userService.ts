@@ -45,12 +45,22 @@ export class UserService {
         },
       });
 
-      await prisma.userRole.create({
-        data: {
-          userId: user.id,
-          roleId: process.env.DEFAULT_USER_ROLE_ID!,
-        },
+      const roleId = await prisma.role.findUnique({
+        where: { name: 'user' },
+        select: { id: true },
       });
+
+      if (roleId) {
+        await prisma.userRole.create({
+          data: {
+            userId: user.id,
+            roleId: roleId.id,
+            roleName: 'user',
+          },
+        });
+      } else {
+        console.error('Role not found');
+      }
 
       return user;
     } catch (error) {
