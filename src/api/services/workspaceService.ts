@@ -29,6 +29,14 @@ export class WorkspaceService {
 
   public async createWorkspace(data: CreateWorkspaceBody) {
     try {
+      const existingWorkspace = await prisma.workspace.findUnique({
+        where: { name: data.name },
+      });
+  
+      if (existingWorkspace) {
+        throw new ValidationError('Workspace name must be unique');
+      }
+      
       const workspace = await prisma.workspace.create({
         data: {
           ...data,

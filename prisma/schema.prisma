@@ -8,23 +8,25 @@ generator client {
 }
 
 model User {
-  id           String      @id @default(uuid())
-  email        String      @unique
-  name         String?
-  password     String?
-  googleId     String?
-  picture      String?
-  refreshToken String?
-  roles        Role[]      @relation("UserRoles")
-  projects     Project[]   @relation("ProjectUsers")
-  tasks        Task[]      @relation("TaskAssignees")
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  UserRole     UserRole[]
-  Comment      Comment[]
-  ChangeLog    ChangeLog[]
-  Team         Team[]      @relation("TeamMembers")
-  Feedback     Feedback[]
+  id                String      @id @default(uuid())
+  email             String      @unique
+  name              String?
+  password          String?
+  googleId          String?
+  picture           String?
+  refreshToken      String?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  roles             Role[]      @relation("UserRoles")
+  projects          Project[]   @relation("ProjectUsers")
+  tasks             Task[]      @relation("TaskAssignees")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  UserRole          UserRole[]
+  Comment           Comment[]
+  ChangeLog         ChangeLog[]
+  Team              Team[]      @relation("TeamMembers")
+  Feedback          Feedback[]
 
   FavoriteBoard FavoriteBoard[]
 }
@@ -72,7 +74,7 @@ model RolePermission {
 
 model Workspace {
   id        String    @id @default(uuid())
-  name      String
+  name      String    @unique
   projects  Project[]
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt

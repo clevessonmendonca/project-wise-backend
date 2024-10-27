@@ -5,6 +5,7 @@ import {
   updateWorkspaceSchema,
 } from '../../errors/validationSchemas';
 import { ZodError } from 'zod';
+import { NotFoundError, ValidationError } from '../../errors/validationErrors';
 
 export class WorkspaceController {
   private workspaceService: WorkspaceService;
@@ -53,19 +54,16 @@ export class WorkspaceController {
       const workspace = await this.workspaceService.createWorkspace(body);
       reply.status(201).send(workspace);
     } catch (error) {
-      if (error instanceof ZodError) {
-        reply
-          .status(400)
-          .send({ error: 'Validation failed', details: error.errors });
+      if (error instanceof ValidationError) {
+        reply.status(error.statusCode).send({ error: error.message });
+      } else if (error instanceof NotFoundError) {
+        reply.status(error.statusCode).send({ error: error.message });
       } else if (error instanceof Error) {
-        console.error('Error creating workspace:', error.message);
-        reply.status(500).send({
-          error: 'Failed to create workspace',
-          details: error.message,
-        });
+        console.error('Unexpected error:', error.message);
+        reply.status(500).send({ error: 'Internal server error' });
       } else {
-        console.error('Unexpected error:', error);
-        reply.status(500).send({ error: 'Unexpected error occurred' });
+        console.error('Unknown error:', error);
+        reply.status(500).send({ error: 'Unknown error occurred' });
       }
     }
   }

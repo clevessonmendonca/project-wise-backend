@@ -10,4 +10,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     authController.googleCallback.bind(authController),
   );
   fastify.post('/refresh-token', authController.refreshToken.bind(authController));
+  
+  fastify.post('/forgot-password', authController.forgotPassword.bind(authController));
+  fastify.post('/reset-password', authController.resetPassword.bind(authController));
 }

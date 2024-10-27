@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../config';
+import { JWT_SECRET_KEY } from '../config/env';
 import prisma from '../models/prismaClient';
 
 export function checkPermissions(requiredPermissions: string[]) {

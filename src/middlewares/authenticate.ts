@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { verify } from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../config';
+import { JWT_SECRET_KEY } from '../config/env';
 
 export async function authenticate(
   request: FastifyRequest,

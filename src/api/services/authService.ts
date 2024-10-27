@@ -1,11 +1,13 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import prisma from '../../models/prismaClient';
 import { ValidationError, ServerError } from '../../errors/validationErrors';
 import { UserService } from './userService';
 import { PasswordService } from '../../utils/passwordService';
 import { generateAccessToken, generateRefreshToken } from '../../utils/jwt';
-import { REFRESH_TOKEN_SECRET } from '../../config';
+import { BASE_URL_FRONT, REFRESH_TOKEN_SECRET } from '../../config/env';
+import { sendResetPasswordEmail } from '../../utils/sendResetPasswordEmail';
 
 interface DecodedToken {
   email?: string;
@@ -123,6 +125,66 @@ export class AuthService {
       return { token: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
       throw new ValidationError('Refresh token inválido ou expirado');
+    }
+  }
+
+  public async forgotPassword(email: string): Promise<void> {
+    try {
+      const user = await prisma.user.findUnique({ where: { email } });
+
+      if (!user) {
+        throw new ValidationError('Usuário não encontrado com esse e-mail.');
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpires = new Date(Date.now() + 3600000); // Token expira em 1 hora
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetToken,
+          resetTokenExpires,
+        },
+      });
+
+      const resetUrl = `${BASE_URL_FRONT}/auth/reset-password?token=${resetToken}`;
+      await sendResetPasswordEmail(user.email, resetUrl);
+    } catch (error) {
+      console.error('Erro ao enviar e-mail de recuperação de senha:', error);
+      throw new ServerError('Falha ao enviar e-mail de recuperação de senha.');
+    }
+  }
+
+  public async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
+    try {
+      console.log(token, newPassword);
+      const user = await prisma.user.findFirst({
+        where: {
+          resetToken: token,
+          resetTokenExpires: { gt: new Date() },
+        },
+      });
+
+      if (!user) {
+        throw new ValidationError('Token inválido ou expirado.');
+      }
+
+      const hashedPassword = await PasswordService.hashPassword(newPassword);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null, // Limpa o token após a utilização
+          resetTokenExpires: null, // Limpa a expiração após a utilização
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error);
+      throw new ServerError('Falha ao redefinir senha.');
     }
   }
 }

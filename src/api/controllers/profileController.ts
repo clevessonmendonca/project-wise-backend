@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/userService';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../../config';
+import { JWT_SECRET_KEY } from '../../config/env';
 
 export class ProfileController {
   private userService: UserService;
@@ -44,6 +44,11 @@ export class ProfileController {
   }
 
   private validateTokenAndGetUserId(token: string): string | null {
+    if (!token) {
+      console.error("No token provided");
+      return null;
+    }
+    
     try {
       const decoded = jwt.verify(token, JWT_SECRET_KEY as string) as {
         sub: string;

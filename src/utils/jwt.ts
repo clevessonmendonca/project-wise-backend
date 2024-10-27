@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY, REFRESH_TOKEN_SECRET } from '../config';
+import { JWT_SECRET_KEY, REFRESH_TOKEN_SECRET } from '../config/env';
 
 export function generateAccessToken(userId: string): string {
   return jwt.sign({ sub: userId }, JWT_SECRET_KEY, { expiresIn: '1h' });
